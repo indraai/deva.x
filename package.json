@@ -1,6 +1,6 @@
 {
   "name": "@feecting/twitterdeva",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "The Twitter Deva",
   "main": "index.js",
   "scripts": {
