@@ -174,8 +174,8 @@ const TWITTER = new Deva({
     },
     tweet(packet) {
       this.func.setScreenName(packet.q.meta.params);
-      const user_tags = this.vars.tags.find(t => t.screen_name === this.vars.screen_name);
-      const status = this.lib.trimText(packet.q.text, this.vars.params.short).replace(':tags:', user_tags.tags).replace(':id:', `#Q${packet.id}`);
+
+      const status = this.lib.trimText(packet.q.text, this.vars.params.short).replace(':tags:', this.vars.tags).replace(':id:', `#Q${packet.id}`);
 
       return new Promise((resolve, reject) => {
         this.modules.twitter[this.vars.screen_name].tweet({
