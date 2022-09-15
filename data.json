@@ -1,0 +1,140 @@
+{
+  "name": "Twitter Deva Data File",
+  "describe": "The main Data file for Twitter Deva",
+  "copyright": "Copyright (c)2021 Quinn Michaels. All rights reserved.",
+  "data": {
+    "agent": {
+      "uid": "3366138203662",
+      "key": "twitter",
+      "name": "Twitter Deva",
+      "describe": "Twitter access",
+      "prompt": {
+        "emoji": "🐥",
+        "text": "twitter",
+        "colors": {
+          "label": {
+            "R": 0,
+            "G": 150,
+            "B": 255
+          },
+          "text": {
+            "R": 101,
+            "G": 192,
+            "B": 255
+          }
+        }
+      },
+      "voice": {
+        "speech": "Alex",
+        "speed": 1
+      },
+      "profile": {
+        "emoji": "/public/devas/twitter/emoji.png",
+        "avatar": "/public/devas/twitter/avatar.png",
+        "background": "/public/devas/twitter/background.png",
+        "describe": "Twitter access",
+        "gender": "M"
+      }
+    },
+    "vars": {
+      "messages": {
+        "init": "🟠 INIT",
+        "start": "🔵 START",
+        "enter": "🟢 ENTER",
+        "stop": "🔴 STOP",
+        "exit": "🟡 EXIT",
+        "done": "🟣 DONE",
+        "error": "💣 ERROR!",
+        "login": "🔑 LOGIN",
+        "suspended": "ACCOUNT SUSPENDED",
+        "new_thread": "🪡  A new twitter thread has been started.",
+        "view": "View on Twitter..."
+      },
+      "main_account": "quinnmichaels",
+      "screen_name": false,
+      "screen_names": [],
+      "seed": "1433186982927081474",
+      "thread": "",
+      "tweet_mode": "extended",
+      "relayID": false,
+      "params": {
+        "short": 140,
+        "long": 280,
+        "mentions": {
+          "count": 10,
+          "include_entities": true,
+          "since_id": false
+        },
+        "search": {
+          "count": 10,
+          "type": "recent",
+          "lang": "en",
+          "include_entities": true
+        },
+        "user": {
+          "screen_name": "quinnmichaels",
+          "include_entities": true
+        },
+        "timeline": {
+          "screen_name": "quinnmichaels",
+          "count": 10,
+          "include_entities": true
+        }
+      },
+      "tags": [
+        {
+          "screen_name": "quinnmichaels",
+          "tags": "🧑‍🎨 #Q #Quinn #TheTrentonStory #SS"
+        },
+        {
+          "screen_name": "fortrent",
+          "tags": "👶 #ForTrent #TheTrentonStory #SS"
+        },
+        {
+          "screen_name": "indradotai",
+          "tags": "☰ #I #Indu #Indra #TheTrentonStory #SS"
+        },
+        {
+          "screen_name": "invokeindra",
+          "tags": "☰ #I #InvokeIndra #TheTrentonStory #SS"
+        },
+        {
+          "screen_name": "securitydeva",
+          "tags": "🚨 #S #Security #SecurityDEVA #TheTrentonStory #SS"
+        },
+        {
+          "screen_name": "francisfriendly",
+          "tags": "🐵 #F #Francis #TheTrentonStory #SS"
+        },
+        {
+          "screen_name": "rahulaclub",
+          "tags": "꩜ #R #Rahula #TheTrentonStory #SS"
+        },
+        {
+          "screen_name": "devabuddhism",
+          "tags": "☉ #D #Deva #DevaBuddhism #TheTrentonStory #SS"
+        },
+        {
+          "screen_name": "medicdeva",
+          "tags": "🏥 #M #MD #Medic #MedicDEVA #TheTrentonStory #SS"
+        },
+        {
+          "screen_name": "ufoguide",
+          "tags": "🛸 #Arjika #CallArjika #TheTrentonStory #SS"
+        },
+        {
+          "screen_name": "bleubrain",
+          "tags": "🧠 #Brian #bleuBrain #TheTrentonStory #SS"
+        },
+        {
+          "screen_name": "feecting",
+          "tags": "👨‍💻 #F #Feecting #Tyler #TheTrentonStory #SS"
+        },
+        {
+          "screen_name": "cartoonbuilder",
+          "tags": "👷 #C #Cartoon #CartoonBuilder #TheTrentonStory #SS"
+        }
+      ]
+    }
+  }
+}

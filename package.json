@@ -1,0 +1,27 @@
+{
+  "name": "@feecting/twitterdeva",
+  "version": "0.0.1",
+  "description": "The Twitter Deva",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/indraai/TwitterDeva.git"
+  },
+  "keywords": [
+    "Twitter",
+    "Deva"
+  ],
+  "author": "Quinn Michaels",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/indraai/TwitterDeva/issues"
+  },
+  "dependencies": {
+    "@feecting/deva": "^1.0.25",
+    "@feecting/twitter": "^0.2.3"
+  },
+  "homepage": "https://github.com/indraai/TwitterDeva#readme"
+}
