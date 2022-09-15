@@ -113,7 +113,7 @@ const TWITTER = new Deva({
 
       // if there is no thread then set the screen_name to main account.
       if (!vars.screen_name) {
-        this.vars.screen_name = this.vars.main_account;
+        this.vars.screen_name = this.client.services.twitter.main_account;
         return;
       }
 
@@ -131,8 +131,11 @@ const TWITTER = new Deva({
       // then we check to see if the screen name matches the parameter.
       const _lookup = this.client.services.twitter.auth.find(au => au.screen_name.toLowerCase() === _check.toLowerCase()) || false;
 
-      if (_lookup.screen_name) this.vars.screen_name = _lookup.screen_name.toLowerCase();
-      else this.vars.screen_name = vars.main_account;
+      if (_lookup.screen_name) {
+        this.vars.screen_name = _lookup.screen_name.toLowerCase();
+        this.vars.tags = _lookup.tags;
+      }
+      else this.vars.screen_name = this.client.services.twitter.main_account;
       return;
     },
     image(packet) {
@@ -140,7 +143,7 @@ const TWITTER = new Deva({
       return new Promise((resolve, reject) => {
 
         this.modules.twitter[this.vars.screen_name].image(packet.q.data).then(upload => {
-          const user_tags = this.vars.tags.find(t => t.screen_name === this.vars.screen_name);
+          const user_tags = this.client.services.twitter.auth.find(t => t.screen_name === this.vars.screen_name);
           const trimLen = this.vars.params.long - (packet.q.text.length + user_tags.tags.length + packet.id.toString().length + user_tags.tags.split(' ').length);
           const status = `${this.lib.trimText(packet.q.text, trimLen)} ${user_tags.tags} #Q${packet.id}`;
           return this.modules.twitter[this.vars.screen_name].tweet({

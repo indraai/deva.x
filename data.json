@@ -52,6 +52,7 @@
       },
       "main_account": "quinnmichaels",
       "screen_name": false,
+      "tags": "#Deva",
       "screen_names": [],
       "seed": "1433186982927081474",
       "thread": "",
@@ -80,61 +81,7 @@
           "count": 10,
           "include_entities": true
         }
-      },
-      "tags": [
-        {
-          "screen_name": "quinnmichaels",
-          "tags": "🧑‍🎨 #Q #Quinn #TheTrentonStory #SS"
-        },
-        {
-          "screen_name": "fortrent",
-          "tags": "👶 #ForTrent #TheTrentonStory #SS"
-        },
-        {
-          "screen_name": "indradotai",
-          "tags": "☰ #I #Indu #Indra #TheTrentonStory #SS"
-        },
-        {
-          "screen_name": "invokeindra",
-          "tags": "☰ #I #InvokeIndra #TheTrentonStory #SS"
-        },
-        {
-          "screen_name": "securitydeva",
-          "tags": "🚨 #S #Security #SecurityDEVA #TheTrentonStory #SS"
-        },
-        {
-          "screen_name": "francisfriendly",
-          "tags": "🐵 #F #Francis #TheTrentonStory #SS"
-        },
-        {
-          "screen_name": "rahulaclub",
-          "tags": "꩜ #R #Rahula #TheTrentonStory #SS"
-        },
-        {
-          "screen_name": "devabuddhism",
-          "tags": "☉ #D #Deva #DevaBuddhism #TheTrentonStory #SS"
-        },
-        {
-          "screen_name": "medicdeva",
-          "tags": "🏥 #M #MD #Medic #MedicDEVA #TheTrentonStory #SS"
-        },
-        {
-          "screen_name": "ufoguide",
-          "tags": "🛸 #Arjika #CallArjika #TheTrentonStory #SS"
-        },
-        {
-          "screen_name": "bleubrain",
-          "tags": "🧠 #Brian #bleuBrain #TheTrentonStory #SS"
-        },
-        {
-          "screen_name": "feecting",
-          "tags": "👨‍💻 #F #Feecting #Tyler #TheTrentonStory #SS"
-        },
-        {
-          "screen_name": "cartoonbuilder",
-          "tags": "👷 #C #Cartoon #CartoonBuilder #TheTrentonStory #SS"
-        }
-      ]
+      }
     }
   }
 }
