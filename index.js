@@ -43,7 +43,6 @@ const TWITTER = new Deva({
       else this.vars.params.timeline.screen_name = packet.q.text;
       return new Promise((resolve, reject) => {
         this.modules.twitter[this.vars.screen_name].timeline(this.vars.params.timeline).then(result => {
-          console.log('TIMELINE RESULT', result);
           data = result;
           const text = result.map(m => {
             return [
@@ -131,7 +130,6 @@ const TWITTER = new Deva({
 
       // then we check to see if the screen name matches the parameter.
       const _lookup = this.client.services.twitter.auth.find(au => au.screen_name.toLowerCase() === _check.toLowerCase()) || false;
-      console.log('AFTER LOOKUP', _lookup);
 
       if (_lookup.screen_name) this.vars.screen_name = _lookup.screen_name.toLowerCase();
       else this.vars.screen_name = vars.main_account;
@@ -139,7 +137,6 @@ const TWITTER = new Deva({
     },
     image(packet) {
       this.func.setScreenName(packet.q.meta.params);
-      console.log('SCREEN NAME image: ', this.vars.screen_name);
       return new Promise((resolve, reject) => {
 
         this.modules.twitter[this.vars.screen_name].image(packet.q.data).then(upload => {
