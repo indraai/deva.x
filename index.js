@@ -64,7 +64,9 @@ const TWITTER = new Deva({
             html: parsed.a.html,
             data,
           })
-        }).catch(reject);
+        }).catch(err => {
+          return this.error(err, packet, reject);
+        });
       });
     },
     user(opts) {
@@ -95,7 +97,9 @@ const TWITTER = new Deva({
             html: formatted.a.html,
             data,
           })
-        }).catch(reject);
+        }).catch(err => {
+          return this.error(err, packet, reject);
+        });
       });
     },
     newThread() {
@@ -163,7 +167,9 @@ const TWITTER = new Deva({
             html,
             data: result,
           });
-        }).catch(reject);
+        }).catch(err => {
+          return this.error(err, packet, reject);
+        });
       });
     },
     tweet(packet) {
@@ -191,7 +197,9 @@ const TWITTER = new Deva({
           } catch (e) {
             return reject(e);
           }
-        }).catch(reject);
+        }).catch(err => {
+          return this.error(err, packet, reject);
+        });
       });
     },
     htmlFromResult(result, image=false) {
@@ -220,7 +228,9 @@ const TWITTER = new Deva({
             html,
             data: ment,
           });
-        }).catch(reject);
+        }).catch(err => {
+          return this.error(err, packet, reject);
+        });
       });
     },
 
@@ -258,7 +268,9 @@ const TWITTER = new Deva({
             html: parsed.a.html,
             data,
           })
-        }).catch(reject);
+        }).catch(err => {
+          return this.error(err, packet, reject);
+        });
       });
     },
 
@@ -312,7 +324,9 @@ const TWITTER = new Deva({
           this.modules.twitter[sn] = new Twitter(tw);
           this.modules.twitter[sn].verify_credentials().then(profile => {
             if (profile.suspended) this.rompt(`SUSPENDED: ${profile.screen_name}`);
-          }).catch(this.error)
+          }).catch(err => {
+            return this.error(err, packet, reject);
+          });
         });
         return resolve(true)
       });
@@ -425,5 +439,8 @@ const TWITTER = new Deva({
     this.vars.screen_name = this.client.services.twitter.main_account;
     return this.start();
   },
+  onError(err) {
+    console.log('twitter error', err);
+  }
 });
 module.exports = TWITTER
