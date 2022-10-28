@@ -1,5 +1,5 @@
 {
-  "name": "@feecting/twitterdeva",
+  "name": "@indra.ai/twitterdeva",
   "version": "0.0.5",
   "description": "The Twitter Deva",
   "main": "index.js",
@@ -20,8 +20,8 @@
     "url": "https://github.com/indraai/TwitterDeva/issues"
   },
   "dependencies": {
-    "@feecting/deva": "^1.0.25",
-    "@feecting/twitter": "^0.2.3"
+    "@indra.ai/deva": "^1.0.25",
+    "@indra.ai/twitter": "^0.2.3"
   },
   "homepage": "https://github.com/indraai/TwitterDeva#readme"
 }
