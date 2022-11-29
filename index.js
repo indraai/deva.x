@@ -188,7 +188,7 @@ const TWITTER = new Deva({
           tweet_mode: this.vars.tweet_mode,
         }).then(result => {
           try {
-            this.vars.thread = result.id_str;
+            if (!this.vars.thread) this.vars.thread = result.id_str;
             const link = `https://twitter.com/${result.user.screen_name}/statuses/${result.id_str}`;
             const html = this.func.htmlFromResult(result);
 
