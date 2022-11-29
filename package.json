@@ -1,6 +1,6 @@
 {
   "name": "@indra.ai/twitterdeva",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "The Twitter Deva",
   "main": "index.js",
   "scripts": {
