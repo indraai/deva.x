@@ -104,7 +104,10 @@ const TWITTER = new Deva({
     },
     newThread() {
       this.vars.thread = '';
-      return Promise.resolve(this.vars.thread);
+      return Promise.resolve({
+        text: this.vars.messages.new_thread,
+        html: this.vars.messages.new_thread,
+      })
     },
     setScreenName(params) {
       const {vars} = this;
@@ -158,7 +161,7 @@ const TWITTER = new Deva({
             media_ids: upload.media_id_string,
           })
         }).then(result => {
-          this.vars.thread = result.id_str;
+          if (!this.vars.thread) this.vars.thread = result.id_str;
           const link = `https://twitter.com/${result.user.screen_name}/status/${result.id_str}`;
           const html = this.func.htmlFromResult(result, true);
           // reset the packet meta/agent before return
@@ -301,7 +304,7 @@ const TWITTER = new Deva({
               media_ids: upload.media_id_string,
             })
           }).then(tweetResult => {
-            this.vars.thread = tweetResult.id_str;
+            if (!this.vars.thread) this.vars.thread = tweetResult.id_str;
             const tweetURL = `https://twitter.com/${tweetResult.user.screen_name}/status/${tweetResult.id_str}`;
             // reset the packet meta/agent before return
             packet.a.meta.key = this.agent.key;
@@ -361,11 +364,7 @@ const TWITTER = new Deva({
       describe: starts a new twitter thread
     ***********/
     thread(packet) {
-      this.func.newThread();
-      return Promise.resolve({
-        text: this.vars.messages.new_thread,
-        html: this.vars.messages.new_thread,
-      })
+      return this.func.newThread();
     },
 
     // send a tweet
