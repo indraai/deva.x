@@ -277,6 +277,57 @@ const TWITTER = new Deva({
       });
     },
 
+    /**************
+    func: open stream
+    params: opts
+    describe: open a twitter data stream
+    ***************/
+    streamOpen(opts) {
+      return new Promise((resolve, reject) => {
+        this.func.setScreenName(otps.meta.params);
+        const {track, follow} = opts.data;
+        this.modules.twitter[this.vars.screen_name].stream(track, follow).then(() => {
+          return resolve(this.vars.messages.stream_open)
+        });
+      });
+    },
+
+    /**************
+    func: close
+    params: opts
+    describe:
+    ***************/
+    streamClose(opts) {
+      this.func.setScreenName(otps.meta.params);
+      if (this.modules.twitter[this.vars.screen_name].activeStream !== null) this.modules.twitter[this.vars.screen_name].activeStream.abort();
+      this.modules.twitter[this.vars.screen_name].activeStream = null;
+      return Promise.resolve(this.vars.messages.stream_close);
+    },
+
+    streamSuccess(tweet) {
+      const id = this.uid();
+      if (!tweet.id) return false;
+      // broadcast stream success for anyone listening
+      this.talk(this.vars.events.broadcast, {
+        id: this.uid(),
+        agent:this.me,
+        data: tweet,
+        created: Date.now(),
+      });
+    },
+
+    streamEnd(packet) {
+      this.prompt(this.vars.messages.stream_end);
+    },
+
+    streamAbort(packet) {
+      this.prompt(this.vars.messages.stream_abort);
+    },
+
+    streamError(packet) {
+      this.prompt(this.vars.messages.stream_error);
+    },
+
     card(packet) {
       return new Promise((resolve, reject) => {
         this.prompt('MAKING A TWITTER CARD');
@@ -326,6 +377,13 @@ const TWITTER = new Deva({
           const sn = tw.screen_name.toLowerCase();
           this.modules.twitter[sn] = new Twitter(tw);
           this.modules.twitter[sn].verify_credentials().then(profile => {
+
+            this.modules.twitter[sn].events
+              .on(this.vars.events.success, this.func.streamSuccess)
+              .on(this.vars.events.end, this.func.streamEnd)
+              .on(this.vars.events.abort, this.func.streamAbort)
+              .on(this.vars.events.error, this.func.streamError);
+
             if (profile.suspended) this.rompt(`SUSPENDED: ${profile.screen_name}`);
           }).catch(err => {
             return this.error(err, packet, reject);

@@ -48,7 +48,18 @@
         "login": "🔑 LOGIN",
         "suspended": "ACCOUNT SUSPENDED",
         "new_thread": "🪡  A new twitter thread has been started.",
-        "view": "View on Twitter..."
+        "view": "View on Twitter...",
+        "stream_open": "Twitter stream open",
+        "stream_close": "Twitter stream closed",
+        "stream_end": "Twitter stream end",
+        "stream_abort": "Twitter stream abort"
+      },
+      "events": {
+        "success": "twitter:stream:success",
+        "broadcast": "twitter:stream:broadcast",
+        "end": "twitter:stream:end",
+        "error": "twitter:stream:error",
+        "abort": "twitter:stream:abort"
       },
       "main_account": "quinnmichaels",
       "screen_name": false,
