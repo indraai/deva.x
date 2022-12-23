@@ -316,15 +316,15 @@ const TWITTER = new Deva({
       });
     },
 
-    streamEnd(packet) {
+    streamEnd(opts) {
       this.prompt(this.vars.messages.stream_end);
     },
 
-    streamAbort(packet) {
+    streamAbort(opts) {
       this.prompt(this.vars.messages.stream_abort);
     },
 
-    streamError(packet) {
+    streamError(opts) {
       this.prompt(this.vars.messages.stream_error);
     },
 
@@ -460,6 +460,24 @@ const TWITTER = new Deva({
     // 3. include_entities [true|false] (optional)
     search(packet) {
       return this.func.search(packet);
+    },
+
+    /**************
+    method: streamOpen
+    params: packet requires track and follow in data object
+    describe: Open a twitter stream.
+    ***************/
+    streamOpen(packet) {
+      return this.func.streamOpen(packet.q);
+    },
+
+    /**************
+    method: streamClose
+    params: packet
+    describe: close the specificed stream for the user passed the meta params.
+    ***************/
+    streamClose(packet) {
+      return this.func.streamClose(packet.q);
     },
 
     card(packet) {
