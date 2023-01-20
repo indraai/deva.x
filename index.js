@@ -284,8 +284,10 @@ const TWITTER = new Deva({
     ***************/
     streamOpen(opts) {
       return new Promise((resolve, reject) => {
-        this.func.setScreenName(otps.meta.params);
+        this.func.setScreenName(opts.meta.params);
         const {track, follow} = opts.data;
+
+        console.log('stream open', track, follow);
         this.modules.twitter[this.vars.screen_name].stream(track, follow).then(() => {
           return resolve(this.vars.messages.stream_open)
         });
@@ -298,7 +300,7 @@ const TWITTER = new Deva({
     describe:
     ***************/
     streamClose(opts) {
-      this.func.setScreenName(otps.meta.params);
+      this.func.setScreenName(opts.meta.params);
       if (this.modules.twitter[this.vars.screen_name].activeStream !== null) this.modules.twitter[this.vars.screen_name].activeStream.abort();
       this.modules.twitter[this.vars.screen_name].activeStream = null;
       return Promise.resolve(this.vars.messages.stream_close);
@@ -317,6 +319,7 @@ const TWITTER = new Deva({
     },
 
     streamEnd(opts) {
+      console.log('END', opts);
       this.prompt(this.vars.messages.stream_end);
     },
 
@@ -330,10 +333,7 @@ const TWITTER = new Deva({
 
     card(packet) {
       return new Promise((resolve, reject) => {
-        this.prompt('MAKING A TWITTER CARD');
         let theCard = false;
-
-        const theText = this.lib.trimText(packet.q.text, 280);
         // if we want to tweet a card we first need to send a message to the artist
         this.question(`#artist card:${packet.q.meta.params[1]} ${packet.q.text}`).then(artist => {
           theCard = artist.a;
@@ -345,8 +345,9 @@ const TWITTER = new Deva({
             media_data: theCard.data.image,
           }).then(upload => {
             const user_tags = theCard.data.card || this.vars.tags.find(t => t.screen_name === screen_name);
-            const trimLen = this.vars.params.long - (packet.q.text.length + user_tags.tags.length + packet.id.toString().length + user_tags.tags.split(' ').length);
-            const status = `${this.lib.trimText(packet.q.text, trimLen)} ${user_tags.tags} #Q${packet.id}`;
+            const trimLen = (packet.q.text.length + user_tags.tags.length + packet.id.toString().length) - this.vars.params.long;
+            const text = trimLen ? this.lib.trimText(packet.q.text, trimLen) : packet.q.text;
+            const status = `${text} ${user_tags.tags} #Q${packet.id}`;
             return this.modules.twitter[screen_name].tweet({
               status,
               in_reply_to_status_id: this.vars.thread,
@@ -363,7 +364,7 @@ const TWITTER = new Deva({
             packet.a.created = Date.now();
             return resolve({
               text: `card: ${tweetURL}`,
-              html: `<div class="feecting-image"><a href="${tweetURL}" target="twitter"><img src="${tweetResult.entities.media[0].media_url_https}"/></a></div>`,
+              html: `<div class="image"><a href="${tweetURL}" target="twitter"><img src="${tweetResult.entities.media[0].media_url_https}"/></a></div>`,
               data: tweetResult,
             });
           }).catch(reject);

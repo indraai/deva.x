@@ -71,7 +71,7 @@
       "relayID": false,
       "params": {
         "short": 140,
-        "long": 280,
+        "long": 250,
         "mentions": {
           "count": 10,
           "include_entities": true,
