@@ -33,7 +33,7 @@ const TWITTER = new Deva({
   func: {
     timeline(packet) {
       const {params} = packet.q.meta;
-      this.func.setScreenName(params);
+      this.func.setScreenName(params[1]);
       // define the data object here so we can write it to the result
       let data = false;
       // if you want to change the count then add it after the screen_name parameter in index 1
@@ -102,14 +102,14 @@ const TWITTER = new Deva({
         });
       });
     },
-    newThread() {
-      this.vars.thread = '';
+    newThread(id) {
+      this.vars.thread = id ? id : '';
       return Promise.resolve({
         text: this.vars.messages.new_thread,
         html: this.vars.messages.new_thread,
       })
     },
-    setScreenName(params) {
+    setScreenName(name) {
       const {vars} = this;
 
       // load the screen names into a local array
@@ -121,22 +121,17 @@ const TWITTER = new Deva({
       // if there is no thread then set the screen_name to main account.
       if (!vars.screen_name) {
         this.vars.screen_name = this.client.services.twitter.main_account;
-        return;
       }
 
-      // if there is nothing to check then return
-      const _check = Array.isArray(params) && params[1] ? params[1] : false;
-      if (!_check) return;
-
       // if we have a random screen_name select from screen_names array.
-      if (_check === 'random') {
+      if (name === 'random') {
         const splice_index = Math.floor(Math.random() * vars.screen_names.length);
         this.vars.screen_name = vars.screen_names.splice(splice_index, 1)[0].toLowerCase();
         return;
       }
 
       // then we check to see if the screen name matches the parameter.
-      const _lookup = this.client.services.twitter.auth.find(au => au.screen_name.toLowerCase() === _check.toLowerCase()) || false;
+      const _lookup = this.client.services.twitter.auth.find(au => au.screen_name.toLowerCase() === name.toLowerCase()) || false;
 
       if (_lookup.screen_name) {
         this.vars.screen_name = _lookup.screen_name.toLowerCase();
@@ -146,7 +141,7 @@ const TWITTER = new Deva({
       return;
     },
     image(packet) {
-      this.func.setScreenName(packet.q.meta.params);
+      this.func.setScreenName(packet.q.meta.params[1]);
       return new Promise((resolve, reject) => {
 
         this.modules.twitter[this.vars.screen_name].image(packet.q.data).then(upload => {
@@ -176,7 +171,7 @@ const TWITTER = new Deva({
       });
     },
     tweet(packet) {
-      this.func.setScreenName(packet.q.meta.params);
+      this.func.setScreenName(packet.q.meta.params[1]);
 
       const status = this.lib.trimText(packet.q.text, this.vars.params.short).replace(':tags:', this.vars.tags).replace(':id:', `#Q${packet.id}`);
 
@@ -216,7 +211,7 @@ const TWITTER = new Deva({
       ].join('\n')
     },
     mentions(packet) {
-      this.func.setScreenName(packet.q.meta.params);
+      this.func.setScreenName(packet.q.meta.params[1]);
       return new Promise((resolve, reject) => {
         this.modules.twitter[this.vars.screen_name].mentions(this.vars.params.mentions).then(ment => {
           const html = ment.map(m => {
@@ -239,7 +234,7 @@ const TWITTER = new Deva({
 
     search(packet) {
       const {params} = packet.q.meta;
-      this.func.setScreenName(params);
+      this.func.setScreenName(params[1]);
 
       return new Promise((resolve, reject) => {
         let data = false;
@@ -284,7 +279,7 @@ const TWITTER = new Deva({
     ***************/
     streamOpen(opts) {
       return new Promise((resolve, reject) => {
-        this.func.setScreenName(opts.meta.params);
+        this.func.setScreenName(opts.meta.params[1]);
         const {track, follow} = opts.data;
 
         console.log('stream open', track, follow);
@@ -300,7 +295,7 @@ const TWITTER = new Deva({
     describe:
     ***************/
     streamClose(opts) {
-      this.func.setScreenName(opts.meta.params);
+      this.func.setScreenName(opts.meta.params[1]);
       if (this.modules.twitter[this.vars.screen_name].activeStream !== null) this.modules.twitter[this.vars.screen_name].activeStream.abort();
       this.modules.twitter[this.vars.screen_name].activeStream = null;
       return Promise.resolve(this.vars.messages.stream_close);
@@ -338,17 +333,25 @@ const TWITTER = new Deva({
         this.question(`#artist card:${packet.q.meta.params[1]} ${packet.q.text}`).then(artist => {
           theCard = artist.a;
 
-          let screen_name = theCard.data.card.acct ? theCard.data.card.acct.toLowerCase() : this.vars.screen_name;
-          screen_name = packet.q.meta.params[2] ? packet.q.meta.params[2] : screen_name;
+          this.func.setScreenName(theCard.data.card.acct);
 
-          this.modules.twitter[screen_name].image({
+          this.prompt(`Username > ${theCard.data.card.acct} - ${this.vars.screen_name}`);
+
+          this.modules.twitter[this.vars.screen_name].image({
             media_data: theCard.data.image,
           }).then(upload => {
-            const user_tags = theCard.data.card || this.vars.tags.find(t => t.screen_name === screen_name);
-            const trimLen = (packet.q.text.length + user_tags.tags.length + packet.id.toString().length) - this.vars.params.long;
+            const {long} = this.vars.params;
+            const user_tags = theCard.data.card || this.vars.tags.find(t => t.screen_name === this.vars.screen_name);
+            const tagLen = user_tags.tags.length + packet.id.toString().length;
+            const textLen = packet.q.text.length + tagLen;
+            const trimLen = textLen > long ? long - tagLen  : 0;
             const text = trimLen ? this.lib.trimText(packet.q.text, trimLen) : packet.q.text;
+
+            console.log('trim len', trimLen);
+            console.log('text', text);
+
             const status = `${text} ${user_tags.tags} #Q${packet.id}`;
-            return this.modules.twitter[screen_name].tweet({
+            return this.modules.twitter[this.vars.screen_name].tweet({
               status,
               in_reply_to_status_id: this.vars.thread,
               auto_populate_reply_metadata: true,
@@ -401,7 +404,7 @@ const TWITTER = new Deva({
     describe: set the account to tweet from
     ***************/
     acct(packet) {
-      this.func.setScreenName(packet.q.meta.params);
+      this.func.setScreenName(packet.q.meta.params[1]);
       return Promise.resolve({text:`acct: ${this.vars.screen_name}`});
     },
 
@@ -423,7 +426,8 @@ const TWITTER = new Deva({
       describe: starts a new twitter thread
     ***********/
     thread(packet) {
-      return this.func.newThread();
+      const id = packet.q.meta.params[1] || '';
+      return this.func.newThread(id);
     },
 
     // send a tweet
