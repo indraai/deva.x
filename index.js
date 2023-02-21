@@ -21,7 +21,7 @@ const TWITTER = new Deva({
       return input.trim();
     },
     parse(input) {
-      return input.trim();
+      return input.trim().split(':br:').join('\n').split(':p:').join('\n\n');
     }
   },
   vars,
@@ -173,7 +173,8 @@ const TWITTER = new Deva({
     tweet(packet) {
       this.func.setScreenName(packet.q.meta.params[1]);
 
-      const status = this.lib.trimText(packet.q.text, this.vars.params.short).replace(':tags:', this.vars.tags).replace(':id:', `#Q${packet.id}`);
+      const parsed = this.agent.parse(packet.q.text);
+      const status = this.lib.trimText(parsed, this.vars.params.short).replace(':tags:', this.vars.tags).replace(':id:', `#Q${packet.id}`);
 
       return new Promise((resolve, reject) => {
         this.modules.twitter[this.vars.screen_name].tweet({
