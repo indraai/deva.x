@@ -161,7 +161,7 @@ const TWITTER = new Deva({
           const html = this.func.htmlFromResult(result, true);
           // reset the packet meta/agent before return
           return resolve({
-            text: `link: ${link}\ntext: ${result.full_text}`,
+            text: `\nlink: ${link}\ntext: ${result.full_text}`,
             html,
             data: result,
           });
@@ -189,7 +189,7 @@ const TWITTER = new Deva({
             const html = this.func.htmlFromResult(result);
 
             return resolve({
-              text: `\nlink: ${link}\ntext: ${result.full_text}`,
+              text: `link: ${link}\ntext: ${result.full_text}`,
               html,
               data: result,
             });
