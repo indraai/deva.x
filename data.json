@@ -52,7 +52,8 @@
         "stream_open": "Twitter stream open",
         "stream_close": "Twitter stream closed",
         "stream_end": "Twitter stream end",
-        "stream_abort": "Twitter stream abort"
+        "stream_abort": "Twitter stream abort",
+        "repeater_get": "Getting tweet information for repeater..."
       },
       "events": {
         "success": "twitter:stream:success",
@@ -71,7 +72,7 @@
       "relayID": false,
       "params": {
         "short": 140,
-        "long": 250,
+        "long": 240,
         "mentions": {
           "count": 10,
           "include_entities": true,

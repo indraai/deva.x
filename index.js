@@ -69,6 +69,40 @@ const TWITTER = new Deva({
         });
       });
     },
+    show(packet) {
+      const {params} = packet.q.meta;
+      this.func.setScreenName(params[1]);
+      let data;
+      // if you want to change the count then add it after the screen_name parameter in index 1
+      // if there is no text in the packet then set the
+      return new Promise((resolve, reject) => {
+        if (!packet.q.text) reject(this.vars.messages.error);
+        this.modules.twitter[this.vars.screen_name].show(packet.q.text).then(twt => {
+          data = twt;
+          const text = [
+              `::begin:tweet`,
+              `avatar:${twt.user.profile_image_url_https}`,
+              `::begin:profile`,
+              `name:${twt.user.name} (@${twt.user.screen_name})`,
+              `status: ${twt.full_text.replace(/\n/g, ' ')}`,
+              `link[Tweet]:https://twitter.com/${twt.user.screen_name}/statuses/${twt.id_str}`,
+              `::end:profile`,
+              `::end:tweet`,
+              '',
+            ].join('\n');
+
+          return this.question(`#feecting parse ${text}`);
+        }).then(parsed => {
+          return resolve({
+            text: parsed.a.text,
+            html: parsed.a.html,
+            data,
+          })
+        }).catch(err => {
+          return this.error(err, packet, reject);
+        });
+      });
+    },
     user(opts) {
       let data = false;
       this.vars.params.user.screen_name = opts.text;
@@ -109,8 +143,9 @@ const TWITTER = new Deva({
         html: this.vars.messages.new_thread,
       })
     },
-    setScreenName(name) {
+    setScreenName(name=false) {
       const {vars} = this;
+      if (!name) return;
 
       // load the screen names into a local array
       const screen_names = this.client.services.twitter.auth.map(au => au.screen_name.toLowerCase())
@@ -140,14 +175,35 @@ const TWITTER = new Deva({
       else this.vars.screen_name = this.client.services.twitter.main_account;
       return;
     },
+
+    /**************
+    method: image
+    params: packet
+            text: packet.q.text
+            screen_name: packet.q.meta.params[1]
+            image: packet.q.data.image
+            tags: packet.q.data.tags
+
+    describe:
+    ***************/
     image(packet) {
       this.func.setScreenName(packet.q.meta.params[1]);
-      return new Promise((resolve, reject) => {
+      if (packet.q.meta.params[2]) this.func.newThread(packet.q.meta.params[2]);
 
-        this.modules.twitter[this.vars.screen_name].image(packet.q.data).then(upload => {
-          const user_tags = this.client.services.twitter.auth.find(t => t.screen_name === this.vars.screen_name);
-          const trimLen = this.vars.params.long - (packet.q.text.length + user_tags.tags.length + packet.id.toString().length + user_tags.tags.split(' ').length);
-          const status = `${this.lib.trimText(packet.q.text, trimLen)} ${user_tags.tags} #Q${packet.id}`;
+      const {data, text, meta} = packet.q;
+      const user_tags = data.card ? data.card.tags : this.vars.tags;
+
+      const {long} = this.vars.params;
+
+      const tagLen = user_tags.length + packet.id.toString().length + 10;
+      const textLen = packet.q.text.length + tagLen;
+      const trimLen = textLen > long ? long - tagLen  : 0;
+      const trimText = trimLen ? this.lib.trimText(packet.q.text, trimLen) : packet.q.text;
+
+      const status = `${trimText} ${user_tags} #Q${packet.id}`;
+
+      return new Promise((resolve, reject) => {
+        this.modules.twitter[this.vars.screen_name].image({media_data: data.image}).then(upload => {
           return this.modules.twitter[this.vars.screen_name].tweet({
             status,
             in_reply_to_status_id: this.vars.thread,
@@ -170,6 +226,7 @@ const TWITTER = new Deva({
         });
       });
     },
+
     tweet(packet) {
       this.func.setScreenName(packet.q.meta.params[1]);
 
@@ -201,16 +258,24 @@ const TWITTER = new Deva({
         });
       });
     },
+
     htmlFromResult(result, image=false) {
+      const {id_str, user, entities, full_text} = result
+      const tweet_url = `https://twitter.com/${user.screen_name}/status/${id_str}`;
+      const ent = entities && entities.media ? entities.media[0] : false;
       return [
         `<article class="tweet">`,
         `<div class="profile">`,
-        `<div class="profile_image"><img src="${result.user.profile_image_url_https}"></div>`,
+        `<div class="profile_image"><img src="${user.profile_image_url_https}"></div>`,
+        `<div class="screen_name">@${user.screen_name}</div>`,
+        `<a href="${tweet_url}" target="_blank">Link</a>`,
         `</div>`,
-        `<div class="text"><a href="https://twitter.com/${result.user.screen_name}/status/${result.id_str}" target="_blank">Link</a>@${result.user.screen_name} > ${result.full_text}</div>`,
+        `<div class="text">${full_text}</div>`,
+        ent ? `<div class="image"><a href="${tweet_url}" target="twitter"><img src="${ent.media_url_https}"/></a></div>` : '',
         `</article>`,
-      ].join('\n')
+      ].join('\n');
     },
+
     mentions(packet) {
       this.func.setScreenName(packet.q.meta.params[1]);
       return new Promise((resolve, reject) => {
@@ -273,108 +338,6 @@ const TWITTER = new Deva({
       });
     },
 
-    /**************
-    func: open stream
-    params: opts
-    describe: open a twitter data stream
-    ***************/
-    streamOpen(opts) {
-      return new Promise((resolve, reject) => {
-        this.func.setScreenName(opts.meta.params[1]);
-        const {track, follow} = opts.data;
-
-        console.log('stream open', track, follow);
-        this.modules.twitter[this.vars.screen_name].stream(track, follow).then(() => {
-          return resolve(this.vars.messages.stream_open)
-        });
-      });
-    },
-
-    /**************
-    func: close
-    params: opts
-    describe:
-    ***************/
-    streamClose(opts) {
-      this.func.setScreenName(opts.meta.params[1]);
-      if (this.modules.twitter[this.vars.screen_name].activeStream !== null) this.modules.twitter[this.vars.screen_name].activeStream.abort();
-      this.modules.twitter[this.vars.screen_name].activeStream = null;
-      return Promise.resolve(this.vars.messages.stream_close);
-    },
-
-    streamSuccess(tweet) {
-      const id = this.uid();
-      if (!tweet.id) return false;
-      // broadcast stream success for anyone listening
-      this.talk(this.vars.events.broadcast, {
-        id: this.uid(),
-        agent:this.me,
-        data: tweet,
-        created: Date.now(),
-      });
-    },
-
-    streamEnd(opts) {
-      console.log('END', opts);
-      this.prompt(this.vars.messages.stream_end);
-    },
-
-    streamAbort(opts) {
-      this.prompt(this.vars.messages.stream_abort);
-    },
-
-    streamError(opts) {
-      this.prompt(this.vars.messages.stream_error);
-    },
-
-    card(packet) {
-      return new Promise((resolve, reject) => {
-        let theCard = false;
-        // if we want to tweet a card we first need to send a message to the artist
-        this.question(`#artist card:${packet.q.meta.params[1]} ${packet.q.text}`).then(artist => {
-          theCard = artist.a;
-
-          this.func.setScreenName(theCard.data.card.acct);
-
-          this.prompt(`Username > ${theCard.data.card.acct} - ${this.vars.screen_name}`);
-
-          this.modules.twitter[this.vars.screen_name].image({
-            media_data: theCard.data.image,
-          }).then(upload => {
-            const {long} = this.vars.params;
-            const user_tags = theCard.data.card || this.vars.tags.find(t => t.screen_name === this.vars.screen_name);
-            const tagLen = user_tags.tags.length + packet.id.toString().length;
-            const textLen = packet.q.text.length + tagLen;
-            const trimLen = textLen > long ? long - tagLen  : 0;
-            const text = trimLen ? this.lib.trimText(packet.q.text, trimLen) : packet.q.text;
-
-            console.log('trim len', trimLen);
-            console.log('text', text);
-
-            const status = `${text} ${user_tags.tags} #Q${packet.id}`;
-            return this.modules.twitter[this.vars.screen_name].tweet({
-              status,
-              in_reply_to_status_id: this.vars.thread,
-              auto_populate_reply_metadata: true,
-              tweet_mode: this.vars.tweet_mode,
-              media_ids: upload.media_id_string,
-            })
-          }).then(tweetResult => {
-            if (!this.vars.thread) this.vars.thread = tweetResult.id_str;
-            const tweetURL = `https://twitter.com/${tweetResult.user.screen_name}/status/${tweetResult.id_str}`;
-            // reset the packet meta/agent before return
-            packet.a.meta.key = this.agent.key;
-            packet.a.agent = this.agent;
-            packet.a.created = Date.now();
-            return resolve({
-              text: `card: ${tweetURL}`,
-              html: `<div class="image"><a href="${tweetURL}" target="twitter"><img src="${tweetResult.entities.media[0].media_url_https}"/></a></div>`,
-              data: tweetResult,
-            });
-          }).catch(reject);
-        }).catch(reject);
-      });
-    },
 
     login() {
       return new Promise((resolve, reject) => {
@@ -382,22 +345,16 @@ const TWITTER = new Deva({
           const sn = tw.screen_name.toLowerCase();
           this.modules.twitter[sn] = new Twitter(tw);
           this.modules.twitter[sn].verify_credentials().then(profile => {
-
-            this.modules.twitter[sn].events
-              .on(this.vars.events.success, this.func.streamSuccess)
-              .on(this.vars.events.end, this.func.streamEnd)
-              .on(this.vars.events.abort, this.func.streamAbort)
-              .on(this.vars.events.error, this.func.streamError);
-
             if (profile.suspended) this.rompt(`SUSPENDED: ${profile.screen_name}`);
           }).catch(err => {
-            return this.error(err, packet, reject);
+            return this.error(err, false, reject);
           });
         });
         return resolve(true)
       });
     },
   },
+
   methods: {
     /**************
     func:     acct
@@ -431,6 +388,12 @@ const TWITTER = new Deva({
       return this.func.newThread(id);
     },
 
+    // show a tweet
+    // params:
+    // id: {packet.q.text}
+    show(packet) {
+      return this.func.show(packet);
+    },
     // send a tweet
     // params:
     // status: {packet.q.text}
@@ -468,28 +431,6 @@ const TWITTER = new Deva({
       return this.func.search(packet);
     },
 
-    /**************
-    method: streamOpen
-    params: packet requires track and follow in data object
-    describe: Open a twitter stream.
-    ***************/
-    streamOpen(packet) {
-      return this.func.streamOpen(packet.q);
-    },
-
-    /**************
-    method: streamClose
-    params: packet
-    describe: close the specificed stream for the user passed the meta params.
-    ***************/
-    streamClose(packet) {
-      return this.func.streamClose(packet.q);
-    },
-
-    card(packet) {
-      return this.func.card(packet);
-    },
-
     uid(packet) {
       return Promise.resolve(this.uid());
     },
@@ -517,7 +458,7 @@ const TWITTER = new Deva({
   onInit() {
     // set the default screen_name at init to the main account.
     this.func.newThread();
-    this.vars.screen_name = this.client.services.twitter.main_account;
+    this.func.setScreenName(this.client.services.twitter.main_account);
     return this.start();
   },
   onError(err) {
