@@ -1,39 +1,56 @@
+// Copyright (c)2025 Quinn Michaels
+
 // Copyright (c)2021 Quinn Michaels
-const fs = require('fs');
-const path = require('path');
+// The Rig Veda Deva
+import Deva from '@indra.ai/deva';
+import axios from 'axios';
 
-const data_path = path.join(__dirname, 'data.json');
-const {agent,vars} = require(data_path).data;
+import pkg from './package.json' with {type:'json'};
+import data from './data.json' with {type:'json'};
+const {agent,vars } = data.DATA;
 
-const Deva = require('@indra.ai/deva');
-const Twitter = require('@indra.ai/twitter');
+// set the __dirname
+import {dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';    
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const TWITTER = new Deva({
-  agent: {
-    uid: agent.uid,
-    key: agent.key,
-    name: agent.name,
-    describe: agent.describe,
-    prompt: agent.prompt,
-    voice: agent.voice,
-    profile: agent.profile,
+const info = {
+  id: pkg.id,
+  name: pkg.name,
+  describe: pkg.description,
+  version: pkg.version,
+  url: pkg.homepage,
+  dir: __dirname,
+  git: pkg.repository.url,
+  bugs: pkg.bugs.url,
+  author: pkg.author,
+  license: pkg.license,
+  copyright: pkg.copyright,
+};
+
+const X = new Deva({
+  info, 
+  agent, 
+  vars,
+  utils: {
     translate(input) {
       return input.trim();
     },
     parse(input) {
       return input.trim().split(':br:').join('\n').split(':p:').join('\n\n');
-    }
+    }, 
+    process(input) {
+      return input.trim();
+    },
   },
-  vars,
   listeners: {},
   modules: {
     twitter: {},
   },
-  deva: {},
+  devas: {},
   func: {
     timeline(packet) {
       const {params} = packet.q.meta;
-      this.func.setScreenName(params[1]);
       // define the data object here so we can write it to the result
       let data = false;
       // if you want to change the count then add it after the screen_name parameter in index 1
@@ -103,11 +120,11 @@ const TWITTER = new Deva({
         });
       });
     },
-    user(opts) {
+    me(opts) {
       let data = false;
-      this.vars.params.user.screen_name = opts.text;
       return new Promise((resolve, reject) => {
-        this.modules.twitter[this.vars.screen_name].user(this.vars.params.user).then(result => {
+        this.modules.api.get('https://api.x.com/2/users/me').then(result => {
+          console.log(result);
           data = result;
           const describe = result.description ? result.description.replace(/\n/g, ' ') : '';
           const status = result.status && result.status.text ? result.status.text.replace(/\n/g, ' ') : '';
@@ -124,7 +141,7 @@ const TWITTER = new Deva({
             '::end:user',
             '',
           ].join('\n');
-          return this.question(`#feecting parse ${formatted}`);
+          return this.question(`${this.askChr}feecting parse ${formatted}`);
         }).then(formatted => {
           return resolve({
             text: formatted.a.text,
@@ -132,7 +149,7 @@ const TWITTER = new Deva({
             data,
           })
         }).catch(err => {
-          return this.error(err, packet, reject);
+          return this.error(err, opts, reject);
         });
       });
     },
@@ -142,38 +159,6 @@ const TWITTER = new Deva({
         text: this.vars.messages.new_thread,
         html: this.vars.messages.new_thread,
       })
-    },
-    setScreenName(name=false) {
-      const {vars} = this;
-      if (!name) return;
-
-      // load the screen names into a local array
-      const screen_names = this.client.services.twitter.auth.map(au => au.screen_name.toLowerCase())
-
-      // if there are no more screen names reload the array.
-      if (!vars.screen_names.length) this.vars.screen_names = screen_names;
-
-      // if there is no thread then set the screen_name to main account.
-      if (!vars.screen_name) {
-        this.vars.screen_name = this.client.services.twitter.main_account;
-      }
-
-      // if we have a random screen_name select from screen_names array.
-      if (name === 'random') {
-        const splice_index = Math.floor(Math.random() * vars.screen_names.length);
-        this.vars.screen_name = vars.screen_names.splice(splice_index, 1)[0].toLowerCase();
-        return;
-      }
-
-      // then we check to see if the screen name matches the parameter.
-      const _lookup = this.client.services.twitter.auth.find(au => au.screen_name.toLowerCase() === name.toLowerCase()) || false;
-
-      if (_lookup.screen_name) {
-        this.vars.screen_name = _lookup.screen_name.toLowerCase();
-        this.vars.tags = _lookup.tags;
-      }
-      else this.vars.screen_name = this.client.services.twitter.main_account;
-      return;
     },
 
     /**************
@@ -187,8 +172,6 @@ const TWITTER = new Deva({
     describe:
     ***************/
     image(packet) {
-      this.func.setScreenName(packet.q.meta.params[1]);
-      if (packet.q.meta.params[2]) this.func.newThread(packet.q.meta.params[2]);
 
       const {data, text, meta} = packet.q;
       const user_tags = data.card ? data.card.tags : this.vars.tags;
@@ -228,10 +211,9 @@ const TWITTER = new Deva({
     },
 
     tweet(packet) {
-      this.func.setScreenName(packet.q.meta.params[1]);
 
       let status = this.lib.trimText(packet.q.text, this.vars.params.short).replace(':tags:', `:p:${this.vars.tags}`).replace(':id:', `:br:#Q${packet.id}`);
-      status = this.agent.parse(status);
+      status = this.agent().parse(status);
 
       return new Promise((resolve, reject) => {
         this.modules.twitter[this.vars.screen_name].tweet({
@@ -277,7 +259,6 @@ const TWITTER = new Deva({
     },
 
     mentions(packet) {
-      this.func.setScreenName(packet.q.meta.params[1]);
       return new Promise((resolve, reject) => {
         this.modules.twitter[this.vars.screen_name].mentions(this.vars.params.mentions).then(ment => {
           const html = ment.map(m => {
@@ -300,7 +281,6 @@ const TWITTER = new Deva({
 
     search(packet) {
       const {params} = packet.q.meta;
-      this.func.setScreenName(params[1]);
 
       return new Promise((resolve, reject) => {
         let data = false;
@@ -337,33 +317,16 @@ const TWITTER = new Deva({
         });
       });
     },
-
-
-    login() {
-      return new Promise((resolve, reject) => {
-        this.client.services.twitter.auth.forEach(tw => {
-          const sn = tw.screen_name.toLowerCase();
-          this.modules.twitter[sn] = new Twitter(tw);
-          this.modules.twitter[sn].verify_credentials().then(profile => {
-            if (profile.suspended) this.rompt(`SUSPENDED: ${profile.screen_name}`);
-          }).catch(err => {
-            return this.error(err, false, reject);
-          });
-        });
-        return resolve(true)
-      });
-    },
   },
 
   methods: {
     /**************
-    func:     acct
+    func:     me
     params: packet
     describe: set the account to tweet from
     ***************/
-    acct(packet) {
-      this.func.setScreenName(packet.q.meta.params[1]);
-      return Promise.resolve({text:`acct: ${this.vars.screen_name}`});
+    me(packet) {
+      return this.func.me(packet.q);
     },
 
     /***********
@@ -373,9 +336,6 @@ const TWITTER = new Deva({
     ***********/
     timeline(packet) {
       return this.func.timeline(packet)
-    },
-    user(packet) {
-      return this.func.user(packet.q);
     },
 
     /***********
@@ -431,12 +391,6 @@ const TWITTER = new Deva({
       return this.func.search(packet);
     },
 
-    uid(packet) {
-      return Promise.resolve(this.uid());
-    },
-    status(packet) {
-      return this.status();
-    },
     help(packet) {
       return new Promise((resolve, reject) => {
         this.lib.help(packet.q.text, __dirname).then(text => {
@@ -445,24 +399,22 @@ const TWITTER = new Deva({
       });
     }
   },
-  onEnter() {
-    this.func.login();
-    return this.done();
-  },
-  onExit() {
-    return this.done();
-  },
-  onDone() {
-    return Promise.resolve(this.vars.messages.done);
-  },
-  onInit() {
+  onReady(data, resolve) {
     // set the default screen_name at init to the main account.
-    this.func.newThread();
-    this.func.setScreenName(this.client.services.twitter.main_account);
-    return this.start();
+    const {personal} = this.security();
+    this.vars.screen_name = personal.screen_name;
+    this.modules.api = axios.create({
+      headers: {
+        'Authorization': `Bearer ${personal.bearer}`,
+        'Content-Type': 'application/json',
+      }
+    });
+    this.prompt('ready');
+    return resolve(data);
   },
-  onError(err) {
-    console.log('twitter error', err);
+  onError(err, data, reject) {
+    console.log('x error', err);
+    return reject(err);
   }
 });
-module.exports = TWITTER
+export default X

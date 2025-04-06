@@ -1,14 +1,15 @@
 {
-  "name": "@indra.ai/twitterdeva",
+  "name": "@indra.ai/deva.x",
   "version": "0.0.17",
-  "description": "The Twitter Deva",
+  "description": "The X Deva",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/indraai/TwitterDeva.git"
+    "url": "git+ssh://git@github.com/indraai/deva.x.git"
   },
   "keywords": [
     "Twitter",
@@ -17,11 +18,11 @@
   "author": "Quinn Michaels",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/indraai/TwitterDeva/issues"
+    "url": "https://github.com/indraai/deva.x/issues"
   },
   "dependencies": {
-    "@indra.ai/deva": "^1.0.33",
-    "@indra.ai/twitter": "^0.2.7"
+    "@indra.ai/deva": "^1.4.23",
+    "axios": "^1.7.9"
   },
-  "homepage": "https://github.com/indraai/TwitterDeva#readme"
+  "homepage": "https://deva.space/devas/x"
 }

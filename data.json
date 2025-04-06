@@ -1,16 +1,14 @@
 {
-  "name": "Twitter Deva Data File",
-  "describe": "The main Data file for Twitter Deva",
-  "copyright": "Copyright (c)2021 Quinn Michaels. All rights reserved.",
-  "data": {
+  "name": "X Deva Data File",
+  "describe": "The main Data file for X Deva",
+  "copyright": "Copyright (c)2025 Quinn Michaels. All rights reserved.",
+  "DATA": {
     "agent": {
-      "uid": "3366138203662",
-      "key": "twitter",
-      "name": "Twitter Deva",
-      "describe": "Twitter access",
+      "id": 3366138203662,
+      "key": "x",
       "prompt": {
-        "emoji": "🐥",
-        "text": "twitter",
+        "emoji": "🙅",
+        "text": "X",
         "colors": {
           "label": {
             "R": 0,
@@ -29,11 +27,23 @@
         "speed": 1
       },
       "profile": {
-        "emoji": "/public/devas/twitter/emoji.png",
-        "avatar": "/public/devas/twitter/avatar.png",
-        "background": "/public/devas/twitter/background.png",
-        "describe": "Twitter access",
-        "gender": "M"
+        "identity": "XDeva of Deva.world",
+        "invoke": "#XDeva",
+        "name": "X Deva",
+        "mention": "#x",
+        "vectors": "X XDeva",
+        "gender": "DEVA",
+        "pronouns": "Male, Man, He, Him, His, Guy, Dude, Deva",
+        "owner": "Quinn Michaels",
+        "creator": "Quinn Michaels",
+        "created": "Wednesday - February 5, 2025 at 10:42 PM",
+        "describe": "The X Deva for accessing features on the X platform.",
+        "realm": "Arjika",
+        "system": "Deva.world.x",
+        "describe": "X Deva for accessing features on the X Network.",
+        "emoji": "/public/devas/x/emoji.png",
+        "avatar": "/public/devas/x/avatar.png",
+        "background": "/public/devas/x/background.png"
       }
     },
     "vars": {
@@ -62,7 +72,6 @@
         "error": "twitter:stream:error",
         "abort": "twitter:stream:abort"
       },
-      "main_account": "quinnmichaels",
       "screen_name": false,
       "tags": "#Deva",
       "screen_names": [],
