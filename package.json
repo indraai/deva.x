@@ -1,6 +1,6 @@
 {
   "name": "@indra.ai/deva.x",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "The X Deva",
   "main": "index.js",
   "type": "module",
