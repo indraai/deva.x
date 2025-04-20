@@ -21,7 +21,7 @@
     "url": "https://github.com/indraai/deva.x/issues"
   },
   "dependencies": {
-    "@indra.ai/deva": "^1.5.26",
+    "@indra.ai/deva": "^1.5.29",
     "axios": "^1.7.9"
   },
   "homepage": "https://deva.space/devas/x"
